@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <script src="https://unpkg.com/react@16/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/feather-icons@4.24.0/dist/feather.min.js"></script>
+    <link
+      href="https://fonts.googleapis.com/css?family=Open+Sans&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./style.css" />
+    <title>Document</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <script type="text/babel">
+      class LikeHeldText extends React.Component {
+        constructor(props) {
+          super(props);
+          this.state = { liked: false };
+        }
+
+        render() {
+          return <div>Salam</div>;
+        }
+      }
+
+      class LikeButton extends React.Component {
+        constructor(props) {
+          super(props);
+          this.state = { liked: false };
+          this.hello = this.hello.bind(this);
+        }
+
+        hello() {
+          alert('Liked');
+        }
+
+        render() {
+          return (
+            <div>
+              <LikeHeldText />
+              <button onClick={this.hello}>Like</button>
+            </div>
+          );
+        }
+      }
+
+      /**
+       * Main container
+       * Another components will show in this container
+       */
+      class MobileComponent extends React.Component {
+        splashTimer = 5000;
+        constructor(props) {
+          super(props);
+          this.state = {
+            isLoading: true
+          };
+        }
+
+        componentDidMount() {
+          setTimeout(() => {
+            this.setState({ isLoading: false });
+          }, this.splashTimer);
+        }
+
+        render() {
+          return (
+            <div id="mobile">
+              <div id="mobile-container">
+                <StatusBarComponent isLight={this.state.isLoading} />
+                {this.state.isLoading && (
+                  <SplashScreenComponent timer={this.splashTimer} />
+                )}
+                <ActionBarComponent />
+              </div>
+            </div>
+          );
+        }
+      }
+
+      /**
+       * Splash screen
+       * shown when application loading
+       */
+      class SplashScreenComponent extends React.Component {
+        constructor(props) {
+          super(props);
+          this.state = {
+            dead: false
+          };
+        }
+
+        componentDidMount() {
+          setTimeout(() => {
+            this.setState({ dead: true });
+          }, this.props.timer - 300);
+        }
+
+        render() {
+          return (
+            <div
+              id="splash-screen"
+              className={this.state.dead ? 'dead' : 'alive'}
+            >
+              <div className="splash-icon-wrapper">
+                <i className="icon-icecream" />
+                <p>Ice-cream app is loading</p>
+              </div>
+              <div className="loader-wrapper">
+                <div className="load">
+                  <div className="load-animation">
+                    <div className="load-animation-second" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
+        }
+      }
+
+      /**
+       * Main action bar
+       * This component always will show in "@MobileComponent"
+       */
+      class ActionBarComponent extends React.Component {
+        constructor(props) {
+          super(props);
+          this.state = {};
+        }
+
+        render() {
+          return (
+            <div id="action-bar">
+              <button className="f-left">
+                <i className="icon-heart" />
+              </button>
+              <button className="home-botton">
+                <i className="icon-home" />
+              </button>
+              <button className="f-right">
+                <i className="icon-sliders" />
+              </button>
+            </div>
+          );
+        }
+      }
+
+      /**
+       * Status bar
+       * This component always will show in "@MobileComponent"
+       */
+      class StatusBarComponent extends React.Component {
+        date = new Date();
+
+        constructor(props) {
+          super(props);
+          this.state = {
+            time: this.timeFormater()
+          };
+        }
+
+        componentDidMount() {
+          this.setTime();
+        }
+
+        setTime() {
+          let timer = setInterval(() => {
+            this.date = new Date();
+            this.setState({
+              time: this.timeFormater()
+            });
+            clearInterval(timer);
+            this.setTime();
+          }, 1000);
+        }
+
+        timeFormater() {
+          return `${this.date.getHours()}:${
+            this.date.getMinutes() < 10
+              ? '0' + this.date.getMinutes()
+              : this.date.getMinutes()
+          }`;
+        }
+
+        render() {
+          return (
+            <div
+              id="status-bar"
+              className={this.props.isLight ? 'light' : 'dark'}
+            >
+              <div className="f-right status-time">{this.state.time}</div>
+              <div className="f-right">
+                <i className="icon-battery-2" />
+              </div>
+              <div className="f-left">
+                <i className="icon-signal" />
+              </div>
+              <div className="f-left">
+                <i className="icon-wifi" />
+              </div>
+            </div>
+          );
+        }
+      }
+
+      ReactDOM.render(<MobileComponent />, document.getElementById('root'));
+    </script>
+  </body>
+</html>
