@@ -19,6 +19,7 @@
     <div id="root"></div>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://unpkg.com/simplebar@latest/dist/simplebar.min.js"></script>
+    <script src="https://hammerjs.github.io/dist/hammer.min.js"></script>
     <script type="text/babel">
       class LikeHeldText extends React.Component {
         constructor(props) {
@@ -385,6 +386,42 @@
             ]
           };
           this.backToMain = this.backToMain.bind(this);
+          this.topCarousel = React.createRef();
+          this.stepContent = React.createRef();
+        }
+
+        componentDidMount() {
+          const topCarousel = new Hammer(this.topCarousel.current);
+          const stepContent = new Hammer(this.stepContent.current);
+          const _this = this;
+          topCarousel.on('panend', function(ev) {
+            switch (ev.direction) {
+              case 4:
+                _this.changeStep('prev');
+                break;
+              case 2:
+                _this.changeStep('next');
+                break;
+            }
+          });
+
+          stepContent.on('panend', function(ev) {
+            const _currentStep = _this.state.step;
+            const _currentItem = _this.state.steps[_currentStep].item;
+            switch (ev.direction) {
+              case 4:
+                if (_currentItem > 0)
+                  _this.setItem(_currentStep, _currentItem - 1);
+                break;
+              case 2:
+                if (
+                  _currentItem <
+                  _this.state.steps[_currentStep].items.length - 1
+                )
+                  _this.setItem(_currentStep, _currentItem + 1);
+                break;
+            }
+          });
         }
 
         backToMain() {
@@ -392,11 +429,14 @@
         }
 
         changeStep(type) {
-          if (type === 'next') {
+          if (
+            type === 'next' &&
+            this.state.step < this.state.steps.length - 1
+          ) {
             this.setState({
               step: this.state.step + 1
             });
-          } else if (type === 'prev') {
+          } else if (type === 'prev' && this.state.step > 0) {
             this.setState({
               step: this.state.step - 1
             });
@@ -424,7 +464,11 @@
               </div>
               <div className="steps-wrapper">
                 <p className="step-counter">STEP {this.state.step + 1}</p>
-                <div className="carousel-wrapper">
+                <div
+                  id="ssss"
+                  className="carousel-wrapper"
+                  ref={this.topCarousel}
+                >
                   <button
                     disabled={this.state.step === 0 ? 'disabled' : ''}
                     onClick={() => this.changeStep('prev')}
@@ -461,7 +505,7 @@
                     <i className="icon-chevron-right" />
                   </button>
                 </div>
-                <div className="step-content-wrapper">
+                <div className="step-content-wrapper" ref={this.stepContent}>
                   <div className="indicator" />
                   {this.state.steps.map((v, i) => {
                     return (
