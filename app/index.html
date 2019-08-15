@@ -57,12 +57,12 @@
        * Another components will show in this container
        */
       class MobileComponent extends React.Component {
-        splashTimer = 5000;
+        splashTimer = 1000;
         constructor(props) {
           super(props);
           this.state = {
             isLoading: true,
-            page: 'welcomeScreen',
+            page: 'producerScreen',
             animation: false
           };
           this.router = this.router.bind(this);
@@ -78,9 +78,18 @@
               );
               break;
             case 'producerScreen':
-              return <ProducerScreenComponent />;
+              return (
+                <ProducerScreenComponent
+                  onChangeRouter={e => this.setRouter(e)}
+                />
+              );
               break;
             default:
+              return (
+                <WelcomeScreenComponent
+                  onChangeRouter={e => this.setRouter(e)}
+                />
+              );
               break;
           }
         }
@@ -94,7 +103,7 @@
               page: value,
               animation: false
             });
-          }, interval || 800);
+          }, interval || 600);
         }
 
         componentDidMount() {
@@ -302,11 +311,224 @@
       class ProducerScreenComponent extends React.Component {
         constructor(props) {
           super(props);
-          this.state = {};
+          this.state = {
+            step: 0,
+            steps: [
+              {
+                title: 'Choose Cone',
+                item: 2,
+                items: [
+                  {
+                    id: '1',
+                    image: './dist/waffle-cone.png',
+                    title: 'Waffle cone'
+                  },
+                  {
+                    id: '2',
+                    image: './dist/chocolate-cone.png',
+                    title: 'Chocolate cone'
+                  },
+                  {
+                    id: '3',
+                    image: './dist/strawberry-cone.png',
+                    title: 'Strawberry cone'
+                  },
+                  {
+                    id: '4',
+                    image: './dist/sofran-cone.png',
+                    title: 'Sofran cone'
+                  }
+                ]
+              },
+              {
+                title: 'Choose Flavor',
+                item: 0,
+                items: [
+                  {
+                    id: '1',
+                    image: './dist/melon-flavor.png',
+                    title: 'Melon Flavor'
+                  },
+                  {
+                    id: '2',
+                    image: './dist/banana-flavor.png',
+                    title: 'Banana Flavor'
+                  },
+                  {
+                    id: '3',
+                    image: './dist/strawberry-flavor.png',
+                    title: 'Strawberry Flavor'
+                  },
+                  {
+                    id: '4',
+                    image: './dist/blueberry-flavor.png',
+                    title: 'Blueberry Flavor'
+                  }
+                ]
+              },
+              {
+                title: 'Choose sprinkles',
+                item: 0,
+                items: [
+                  {
+                    id: '1',
+                    image: './dist/rainbow-sprinkle.png',
+                    title: 'Rainbow Sprinkle'
+                  },
+                  {
+                    id: '2',
+                    image: './dist/red-sprinkle.png',
+                    title: 'Red Sprinkle'
+                  }
+                ]
+              }
+            ]
+          };
+          this.backToMain = this.backToMain.bind(this);
+        }
+
+        backToMain() {
+          this.props.onChangeRouter('welcomeScreen');
+        }
+
+        changeStep(type) {
+          if (type === 'next') {
+            this.setState({
+              step: this.state.step + 1
+            });
+          } else if (type === 'prev') {
+            this.setState({
+              step: this.state.step - 1
+            });
+          }
+        }
+
+        setItem(step_id, item_id) {
+          const { steps } = this.state;
+          steps[step_id].item = item_id;
+          this.setState({
+            steps
+          });
         }
 
         render() {
-          return <div id="producer-screen">Hello</div>;
+          return (
+            <div id="producer-screen">
+              <div className="nav-bar">
+                <button className="back-buttom" onClick={this.backToMain}>
+                  <i className="icon-arrow-left" />
+                </button>
+                <button className="app-icon">
+                  <i className="icon-icecream" />
+                </button>
+              </div>
+              <div className="steps-wrapper">
+                <p className="step-counter">STEP {this.state.step + 1}</p>
+                <div className="carousel-wrapper">
+                  <button
+                    disabled={this.state.step === 0 ? 'disabled' : ''}
+                    onClick={() => this.changeStep('prev')}
+                  >
+                    <i className="icon-chevron-left" />
+                  </button>
+
+                  <div className="carousel-title">
+                    {this.state.steps.map((v, i) => {
+                      return (
+                        <p
+                          key={i}
+                          className={
+                            i === this.state.step
+                              ? 'active'
+                              : i < this.state.step
+                              ? 'before'
+                              : 'after'
+                          }
+                        >
+                          {v.title}
+                        </p>
+                      );
+                    })}
+                  </div>
+                  <button
+                    disabled={
+                      this.state.step === this.state.steps.length - 1
+                        ? 'disabled'
+                        : ''
+                    }
+                    onClick={() => this.changeStep('next')}
+                  >
+                    <i className="icon-chevron-right" />
+                  </button>
+                </div>
+                <div className="step-content-wrapper">
+                  <div className="indicator" />
+                  {this.state.steps.map((v, i) => {
+                    return (
+                      <div
+                        key={i}
+                        className={
+                          'step-content ' +
+                          (i === this.state.step
+                            ? 'active'
+                            : i < this.state.step
+                            ? 'before'
+                            : 'after')
+                        }
+                      >
+                        {v.items.map((_v, _i) => {
+                          return (
+                            <div
+                              onClick={() => this.setItem(i, _i)}
+                              key={_i}
+                              className={
+                                'step-content-item ' +
+                                (_i === v.item
+                                  ? 'active'
+                                  : _i + 1 === v.item
+                                  ? 'before'
+                                  : _i - 1 === v.item
+                                  ? 'after'
+                                  : _i < v.item
+                                  ? 'before-all'
+                                  : 'after-all')
+                              }
+                            >
+                              <div
+                                className="step-content-item-image"
+                                style={{
+                                  backgroundImage: `url(${_v.image})`
+                                }}
+                              />
+                              <p>{_v.title}</p>
+                            </div>
+                          );
+                        })}
+                        <div className="step-content-footer">
+                          <div className="selected">
+                            <i className="icon-check" />
+                            <span>Selected</span>
+                          </div>
+                          <div className="bullet-wrapper">
+                            {v.items.map((_v, _i) => {
+                              return (
+                                <div
+                                  key={_i}
+                                  className={
+                                    'bullet' + (_i === v.item ? ' active' : '')
+                                  }
+                                />
+                              );
+                            })}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          );
         }
       }
 

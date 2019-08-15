@@ -2,6 +2,7 @@
 
 // color pallete
 $primary: #5ea0f7;
+$primary-text-color: #fff;
 $secondary: #000000;
 $background: #fff;
 $shadow: rgba(0, 0, 0, 0.3);
@@ -118,12 +119,13 @@ body {
 #page-container {
   height: 85%;
   position: relative;
-  overflow: auto;
+  overflow-y: auto;
+  overflow-x: hidden !important;
   padding-bottom: 20px;
   z-index: 1000;
   .page-container-transformer {
     position: relative;
-    transition: all 0.6s;
+    transition: all 0.4s;
     &.active {
       margin-top: 20px;
       opacity: 0;
@@ -296,9 +298,9 @@ button {
   text-align: center;
   padding: 15px;
   .welcome-screen-image {
-    width: 150px;
+    width: 125px;
     position: relative;
-    top: 17px;
+    top: 5px;
   }
   .icon-icecream {
     color: $primary;
@@ -307,6 +309,194 @@ button {
   }
   .description {
     color: #555;
+  }
+}
+
+.nav-bar {
+  display: flex;
+  justify-content: space-between;
+  > button {
+    padding: 15px;
+    font-size: 25px;
+    color: $primary;
+  }
+}
+
+.steps-wrapper {
+  text-align: center;
+  .step-counter {
+    color: #888;
+    font-weight: bold;
+    margin: 0px;
+  }
+  .step-content-wrapper {
+    overflow: hidden;
+    .indicator {
+      height: 90px;
+      border-radius: 50%;
+      box-shadow: 0 0 20px 20px #ecf0f9;
+      margin-bottom: 20px;
+      margin-top: -65px;
+      width: 110%;
+      position: relative;
+      left: -16px;
+      &:after {
+        content: ' ';
+        width: 10px;
+        height: 10px;
+        display: inline-block;
+        background: white;
+        top: 95%;
+        position: absolute;
+        transform: rotate(45deg);
+      }
+    }
+    .step-content {
+      display: inline-block;
+      position: absolute;
+      opacity: 0;
+      transition: all 0.5s, opacity 0.2s;
+      height: 320px;
+      transform-origin: 50% -180%;
+      left: 0;
+      width: 100%;
+      &.before {
+        width: 100%;
+        transform: rotate(45deg);
+      }
+      &.after {
+        width: 100%;
+        transform: rotate(-45deg);
+      }
+      &.active {
+        opacity: 1;
+        position: relative;
+        .step-content-footer {
+          display: block;
+        }
+      }
+      .step-content-item {
+        display: inline-block;
+        position: absolute;
+        transition: all 0.5s;
+        &.active {
+          left: 50%;
+          margin-top: 40px;
+          margin-left: -62px;
+          z-index: 3;
+        }
+        &.before {
+          left: -60px;
+          transform: scale(0.8);
+          -webkit-filter: blur(1px);
+          filter: blur(1px);
+        }
+        &.after {
+          left: 79%;
+          transform: scale(0.8);
+          -webkit-filter: blur(1px);
+          filter: blur(1px);
+        }
+        &.before-all {
+          left: -200%;
+          margin-top: -150px;
+          opacity: 0;
+        }
+        &.after-all {
+          left: 200%;
+          margin-top: -150px;
+          opacity: 0;
+        }
+        .step-content-item-image {
+          width: 135px;
+          height: 135px;
+          border-radius: 50%;
+          border: 4px solid #fff;
+          box-shadow: 0 0 20px #ddd;
+          background-size: 160%;
+          background-position: center -10px;
+        }
+      }
+
+      .step-content-footer {
+        display: none;
+        padding-top: 25px;
+        width: 100%;
+        position: absolute;
+        bottom: 0;
+        text-align: center;
+        .selected {
+          > i {
+            background: $primary;
+            color: $primary-text-color;
+            border-radius: 50%;
+            padding: 2px 0px;
+            margin-right: 5px;
+            position: relative;
+            top: -1px;
+          }
+        }
+
+        .bullet-wrapper {
+          height: 40px;
+          display: flex;
+          justify-content: center;
+          align-items: flex-end;
+          .bullet {
+            display: inline-block;
+            width: 3px;
+            height: 5px;
+            background: $primary;
+            border-radius: 10px;
+            transition: all 0.5s;
+            margin: 10px 5px;
+            &.active {
+              height: 15px;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+.carousel-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  > button {
+    transition: all 0.4s;
+    &[disabled] {
+      opacity: 0.4;
+    }
+    i {
+      margin: 0 10px;
+      font-size: 25px;
+    }
+  }
+  .carousel-title {
+    p {
+      font-size: 17px;
+      font-weight: bold;
+      color: $primary;
+      display: inline-block;
+      position: absolute;
+      opacity: 0;
+      transition: all 0.5s;
+      &.before {
+        left: -100%;
+        width: 100%;
+      }
+      &.after {
+        left: 100%;
+        width: 100%;
+      }
+      &.active {
+        left: 0;
+        opacity: 1;
+        position: relative;
+      }
+    }
   }
 }
 
