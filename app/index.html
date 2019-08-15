@@ -8,16 +8,17 @@
     <script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/feather-icons@4.24.0/dist/feather.min.js"></script>
     <link
-      href="https://fonts.googleapis.com/css?family=Open+Sans&display=swap"
+      href="https://fonts.googleapis.com/css?family=Roboto&display=swap"
       rel="stylesheet"
     />
+
     <link rel="stylesheet" href="./style.css" />
     <title>Document</title>
   </head>
   <body>
     <div id="root"></div>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-
+    <script src="https://unpkg.com/simplebar@latest/dist/simplebar.min.js"></script>
     <script type="text/babel">
       class LikeHeldText extends React.Component {
         constructor(props) {
@@ -60,13 +61,46 @@
         constructor(props) {
           super(props);
           this.state = {
-            isLoading: true
+            isLoading: true,
+            page: 'welcomeScreen',
+            animation: false
           };
+          this.router = this.router.bind(this);
+        }
+
+        router() {
+          switch (this.state.page) {
+            case 'welcomeScreen':
+              return (
+                <WelcomeScreenComponent
+                  onChangeRouter={e => this.setRouter(e)}
+                />
+              );
+              break;
+            case 'producerScreen':
+              return <ProducerScreenComponent />;
+              break;
+            default:
+              break;
+          }
+        }
+
+        setRouter(value, interval) {
+          this.setState({
+            animation: true
+          });
+          setTimeout(() => {
+            this.setState({
+              page: value,
+              animation: false
+            });
+          }, interval || 800);
         }
 
         componentDidMount() {
           setTimeout(() => {
             this.setState({ isLoading: false });
+            this.setRouter(this.state.page, 100);
           }, this.splashTimer);
         }
 
@@ -75,8 +109,19 @@
             <div id="mobile">
               <div id="mobile-container">
                 <StatusBarComponent isLight={this.state.isLoading} />
-                {this.state.isLoading && (
+                {this.state.isLoading ? (
                   <SplashScreenComponent timer={this.splashTimer} />
+                ) : (
+                  <div id="page-container" data-simplebar>
+                    <div
+                      className={
+                        'page-container-transformer' +
+                        (this.state.animation ? ' active' : '')
+                      }
+                    >
+                      {this.router()}
+                    </div>
+                  </div>
                 )}
                 <ActionBarComponent />
               </div>
@@ -207,6 +252,61 @@
               </div>
             </div>
           );
+        }
+      }
+
+      /**
+       * Welcome screen
+       * This component is the main screen of application
+       */
+      class WelcomeScreenComponent extends React.Component {
+        constructor(props) {
+          super(props);
+          this.state = {};
+          this.tapToBegin = this.tapToBegin.bind(this);
+        }
+
+        tapToBegin() {
+          this.props.onChangeRouter('producerScreen');
+        }
+
+        render() {
+          return (
+            <div id="welcome-screen">
+              <i className="icon-icecream" />
+              <h1>Welcome</h1>
+              <p className="description">
+                Customize your own ice cream creation, and your ice cream maker
+                will automatically create it!
+              </p>
+              <div>
+                <img
+                  className="welcome-screen-image"
+                  src="./dist/mainice.png"
+                />
+              </div>
+              <div>
+                <button onClick={this.tapToBegin} className="btn btn-primary">
+                  Tap to begin...
+                </button>
+              </div>
+            </div>
+          );
+        }
+      }
+
+      /**
+       * Producer screen
+       * This component is Producer screen of application
+       */
+      class ProducerScreenComponent extends React.Component {
+        constructor(props) {
+          super(props);
+          this.state = {};
+        }
+
+        render() {
+          return <div id="producer-screen">Hello</div>;
         }
       }
 
