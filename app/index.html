@@ -21,38 +21,6 @@
     <script src="https://unpkg.com/simplebar@latest/dist/simplebar.min.js"></script>
     <script src="https://hammerjs.github.io/dist/hammer.min.js"></script>
     <script type="text/babel">
-      class LikeHeldText extends React.Component {
-        constructor(props) {
-          super(props);
-          this.state = { liked: false };
-        }
-
-        render() {
-          return <div>Salam</div>;
-        }
-      }
-
-      class LikeButton extends React.Component {
-        constructor(props) {
-          super(props);
-          this.state = { liked: false };
-          this.hello = this.hello.bind(this);
-        }
-
-        hello() {
-          alert('Liked');
-        }
-
-        render() {
-          return (
-            <div>
-              <LikeHeldText />
-              <button onClick={this.hello}>Like</button>
-            </div>
-          );
-        }
-      }
-
       /**
        * Main container
        * Another components will show in this container
@@ -95,7 +63,8 @@
           }
         }
 
-        setRouter(value, interval) {
+        setRouter(value, interval, isForce) {
+          if (value === this.state.page && !isForce) return;
           this.setState({
             animation: true
           });
@@ -110,7 +79,7 @@
         componentDidMount() {
           setTimeout(() => {
             this.setState({ isLoading: false });
-            this.setRouter(this.state.page, 100);
+            this.setRouter(this.state.page, 100, true);
           }, this.splashTimer);
         }
 
@@ -133,7 +102,7 @@
                     </div>
                   </div>
                 )}
-                <ActionBarComponent />
+                <ActionBarComponent onChangeRouter={e => this.setRouter(e)} />
               </div>
             </div>
           );
@@ -166,7 +135,7 @@
             >
               <div className="splash-icon-wrapper">
                 <i className="icon-icecream" />
-                <p>Ice-cream app is loading</p>
+                <p>Ice cream app is loading</p>
               </div>
               <div className="loader-wrapper">
                 <div className="load">
@@ -190,18 +159,29 @@
           this.state = {};
         }
 
+        changeRoute(address) {
+          this.props.onChangeRouter(address);
+        }
+
         render() {
           return (
             <div id="action-bar">
               <button className="f-left">
                 <i className="icon-heart" />
               </button>
-              <button className="home-botton">
+              <button
+                onClick={() => this.changeRoute('welcomeScreen')}
+                className="home-botton"
+              >
                 <i className="icon-home" />
               </button>
-              <button className="f-right">
-                <i className="icon-sliders" />
-              </button>
+              <a
+                target="_blank"
+                href="https://codepen.io/yousefsami"
+                className="f-right"
+              >
+                <i className="icon-codeopen" />
+              </a>
             </div>
           );
         }
@@ -382,10 +362,15 @@
                     title: 'Red Sprinkle'
                   }
                 ]
+              },
+              {
+                title: 'Review',
+                review: true
               }
             ]
           };
           this.backToMain = this.backToMain.bind(this);
+          this.review = this.review.bind(this);
           this.topCarousel = React.createRef();
           this.stepContent = React.createRef();
         }
@@ -410,15 +395,23 @@
             const _currentItem = _this.state.steps[_currentStep].item;
             switch (ev.direction) {
               case 4:
-                if (_currentItem > 0)
+                if (_currentItem > 0) {
                   _this.setItem(_currentStep, _currentItem - 1);
+                } else {
+                  _this.changeStep('prev');
+                }
+
                 break;
               case 2:
                 if (
                   _currentItem <
                   _this.state.steps[_currentStep].items.length - 1
-                )
+                ) {
                   _this.setItem(_currentStep, _currentItem + 1);
+                } else {
+                  _this.changeStep('next');
+                }
+
                 break;
             }
           });
@@ -426,6 +419,12 @@
 
         backToMain() {
           this.props.onChangeRouter('welcomeScreen');
+        }
+
+        review() {
+          this.setState({
+            step: 3
+          });
         }
 
         changeStep(type) {
@@ -458,17 +457,13 @@
                 <button className="back-buttom" onClick={this.backToMain}>
                   <i className="icon-arrow-left" />
                 </button>
-                <button className="app-icon">
+                <button className="app-icon" onClick={this.review}>
                   <i className="icon-icecream" />
                 </button>
               </div>
               <div className="steps-wrapper">
                 <p className="step-counter">STEP {this.state.step + 1}</p>
-                <div
-                  id="ssss"
-                  className="carousel-wrapper"
-                  ref={this.topCarousel}
-                >
+                <div className="carousel-wrapper" ref={this.topCarousel}>
                   <button
                     disabled={this.state.step === 0 ? 'disabled' : ''}
                     onClick={() => this.changeStep('prev')}
@@ -520,52 +515,85 @@
                             : 'after')
                         }
                       >
-                        {v.items.map((_v, _i) => {
-                          return (
-                            <div
-                              onClick={() => this.setItem(i, _i)}
-                              key={_i}
-                              className={
-                                'step-content-item ' +
-                                (_i === v.item
-                                  ? 'active'
-                                  : _i + 1 === v.item
-                                  ? 'before'
-                                  : _i - 1 === v.item
-                                  ? 'after'
-                                  : _i < v.item
-                                  ? 'before-all'
-                                  : 'after-all')
-                              }
-                            >
-                              <div
-                                className="step-content-item-image"
-                                style={{
-                                  backgroundImage: `url(${_v.image})`
-                                }}
-                              />
-                              <p>{_v.title}</p>
-                            </div>
-                          );
-                        })}
-                        <div className="step-content-footer">
-                          <div className="selected">
-                            <i className="icon-check" />
-                            <span>Selected</span>
-                          </div>
-                          <div className="bullet-wrapper">
+                        {!v.review ? (
+                          <React.Fragment>
                             {v.items.map((_v, _i) => {
                               return (
                                 <div
+                                  onClick={() => this.setItem(i, _i)}
                                   key={_i}
                                   className={
-                                    'bullet' + (_i === v.item ? ' active' : '')
+                                    'step-content-item ' +
+                                    (_i === v.item
+                                      ? 'active'
+                                      : _i + 1 === v.item
+                                      ? 'before'
+                                      : _i - 1 === v.item
+                                      ? 'after'
+                                      : _i < v.item
+                                      ? 'before-all'
+                                      : 'after-all')
                                   }
-                                />
+                                >
+                                  <div
+                                    className="step-content-item-image"
+                                    style={{
+                                      backgroundImage: `url(${_v.image})`
+                                    }}
+                                  />
+                                  <p>{_v.title}</p>
+                                </div>
                               );
                             })}
-                          </div>
-                        </div>
+                            <div className="step-content-footer">
+                              <div className="selected">
+                                <i className="icon-check" />
+                                <span>Selected</span>
+                              </div>
+                              <div className="bullet-wrapper">
+                                {v.items.map((_v, _i) => {
+                                  return (
+                                    <div
+                                      key={_i}
+                                      className={
+                                        'bullet' +
+                                        (_i === v.item ? ' active' : '')
+                                      }
+                                    />
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          </React.Fragment>
+                        ) : (
+                          <React.Fragment>
+                            {this.state.steps.map((v, i) => {
+                              if (!v.review) {
+                                return (
+                                  <div className="review-item" key={i}>
+                                    <div
+                                      className="review-item-image"
+                                      style={{
+                                        backgroundImage: `url(${
+                                          v.items[v.item].image
+                                        })`
+                                      }}
+                                    />
+                                    <p>{v.items[v.item].title}</p>
+                                  </div>
+                                );
+                              }
+                            })}
+
+                            <button
+                              onClick={this.tapToBegin}
+                              className="btn btn-primary"
+                            >
+                              <i className="icon-check" />
+                              Confirm
+                            </button>
+                          </React.Fragment>
+                        )}
                       </div>
                     );
                   })}
