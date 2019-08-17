@@ -26,13 +26,14 @@
        * Another components will show in this container
        */
       class MobileComponent extends React.Component {
-        splashTimer = 1000;
+        splashTimer = 3000;
         constructor(props) {
           super(props);
           this.state = {
             isLoading: true,
             page: 'producerScreen',
-            animation: false
+            animation: false,
+            props: null
           };
           this.router = this.router.bind(this);
         }
@@ -43,13 +44,23 @@
               return (
                 <WelcomeScreenComponent
                   onChangeRouter={e => this.setRouter(e)}
+                  {...this.state.props}
                 />
               );
               break;
             case 'producerScreen':
               return (
                 <ProducerScreenComponent
+                  onChangeRouter={(e, p) => this.setRouter(e, p)}
+                  {...this.state.props}
+                />
+              );
+              break;
+            case 'finalScreen':
+              return (
+                <FinalScreenComponent
                   onChangeRouter={e => this.setRouter(e)}
+                  {...this.state.props}
                 />
               );
               break;
@@ -57,19 +68,21 @@
               return (
                 <WelcomeScreenComponent
                   onChangeRouter={e => this.setRouter(e)}
+                  {...this.state.props}
                 />
               );
               break;
           }
         }
 
-        setRouter(value, interval, isForce) {
+        setRouter(value, props, interval, isForce) {
           if (value === this.state.page && !isForce) return;
           this.setState({
             animation: true
           });
           setTimeout(() => {
             this.setState({
+              props: props,
               page: value,
               animation: false
             });
@@ -79,32 +92,49 @@
         componentDidMount() {
           setTimeout(() => {
             this.setState({ isLoading: false });
-            this.setRouter(this.state.page, 100, true);
+            this.setRouter(this.state.page, null, 100, true);
           }, this.splashTimer);
         }
 
         render() {
           return (
-            <div id="mobile">
-              <div id="mobile-container">
-                <StatusBarComponent isLight={this.state.isLoading} />
-                {this.state.isLoading ? (
-                  <SplashScreenComponent timer={this.splashTimer} />
-                ) : (
-                  <div id="page-container" data-simplebar>
-                    <div
-                      className={
-                        'page-container-transformer' +
-                        (this.state.animation ? ' active' : '')
-                      }
-                    >
-                      {this.router()}
+            <React.Fragment>
+              <div id="mobile">
+                <div id="mobile-container">
+                  <StatusBarComponent isLight={this.state.isLoading} />
+                  {this.state.isLoading ? (
+                    <SplashScreenComponent timer={this.splashTimer} />
+                  ) : (
+                    <div id="page-container" data-simplebar>
+                      <div
+                        className={
+                          'page-container-transformer' +
+                          (this.state.animation ? ' active' : '')
+                        }
+                      >
+                        {this.router()}
+                      </div>
                     </div>
-                  </div>
-                )}
-                <ActionBarComponent onChangeRouter={e => this.setRouter(e)} />
+                  )}
+                  <ActionBarComponent onChangeRouter={e => this.setRouter(e)} />
+                </div>
               </div>
-            </div>
+              <div id="sign">
+                <div>
+                  <a href="https://codepen.io/yousefsami" target="_blank">
+                    <i className="icon-sami" />
+                  </a>
+                </div>
+                <div>
+                  <a
+                    href="https://dribbble.com/shots/5815774-Ice-Cream-Generator-App-Automated-Hack-21"
+                    target="_blank"
+                  >
+                    <i className="icon-dribbble" />
+                  </a>
+                </div>
+              </div>
+            </React.Fragment>
           );
         }
       }
@@ -156,33 +186,52 @@
       class ActionBarComponent extends React.Component {
         constructor(props) {
           super(props);
-          this.state = {};
+          this.state = {
+            toast: false
+          };
+          this.showToast = this.showToast.bind(this);
         }
 
         changeRoute(address) {
           this.props.onChangeRouter(address);
         }
 
+        showToast() {
+          this.setState({ toast: true });
+          setTimeout(() => {
+            this.setState({ toast: false });
+          }, 5000);
+        }
+
         render() {
           return (
-            <div id="action-bar">
-              <button className="f-left">
-                <i className="icon-heart" />
-              </button>
-              <button
-                onClick={() => this.changeRoute('welcomeScreen')}
-                className="home-botton"
-              >
-                <i className="icon-home" />
-              </button>
-              <a
-                target="_blank"
-                href="https://codepen.io/yousefsami"
-                className="f-right"
-              >
-                <i className="icon-codeopen" />
-              </a>
-            </div>
+            <React.Fragment>
+              <div id="action-bar">
+                <button className="f-left" onClick={this.showToast}>
+                  <i className="icon-heart" />
+                </button>
+                <button
+                  onClick={() => this.changeRoute('welcomeScreen')}
+                  className="home-botton"
+                >
+                  <i className="icon-home" />
+                </button>
+                <a
+                  target="_blank"
+                  href="https://codepen.io/yousefsami"
+                  className="f-right"
+                >
+                  <i className="icon-codeopen" />
+                </a>
+              </div>
+              {this.state.toast && (
+                <div className="toast">
+                  It is an honor for me that you liked ❤️ this pen.
+                  <br />
+                  But please press the heart button on codepen website.
+                </div>
+              )}
+            </React.Fragment>
           );
         }
       }
@@ -272,7 +321,7 @@
               <div>
                 <img
                   className="welcome-screen-image"
-                  src="./dist/mainice.png"
+                  src="https://i.ibb.co/c6HjsM7/mainice.png"
                 />
               </div>
               <div>
@@ -293,6 +342,7 @@
         constructor(props) {
           super(props);
           this.state = {
+            panIsActive: false,
             step: 0,
             steps: [
               {
@@ -301,22 +351,22 @@
                 items: [
                   {
                     id: '1',
-                    image: './dist/waffle-cone.png',
+                    image: 'https://i.ibb.co/2h275Q8/waffle-cone.png',
                     title: 'Waffle cone'
                   },
                   {
                     id: '2',
-                    image: './dist/chocolate-cone.png',
+                    image: 'https://i.ibb.co/pnK7Hqz/chocolate-cone.png',
                     title: 'Chocolate cone'
                   },
                   {
                     id: '3',
-                    image: './dist/strawberry-cone.png',
+                    image: 'https://i.ibb.co/R99bX8c/strawberry-cone.png',
                     title: 'Strawberry cone'
                   },
                   {
                     id: '4',
-                    image: './dist/sofran-cone.png',
+                    image: 'https://i.ibb.co/nPnJjyN/sofran-cone.png',
                     title: 'Sofran cone'
                   }
                 ]
@@ -327,22 +377,22 @@
                 items: [
                   {
                     id: '1',
-                    image: './dist/melon-flavor.png',
+                    image: 'https://i.ibb.co/fMN3HST/melon-flavor.png',
                     title: 'Melon Flavor'
                   },
                   {
                     id: '2',
-                    image: './dist/banana-flavor.png',
+                    image: 'https://i.ibb.co/8XgX4rg//banana-flavor.png',
                     title: 'Banana Flavor'
                   },
                   {
                     id: '3',
-                    image: './dist/strawberry-flavor.png',
+                    image: 'https://i.ibb.co/MVZRS6w/strawberry-flavor.png',
                     title: 'Strawberry Flavor'
                   },
                   {
                     id: '4',
-                    image: './dist/blueberry-flavor.png',
+                    image: 'https://i.ibb.co/LNjQGKy/blueberry-flavor.png',
                     title: 'Blueberry Flavor'
                   }
                 ]
@@ -353,12 +403,12 @@
                 items: [
                   {
                     id: '1',
-                    image: './dist/rainbow-sprinkle.png',
+                    image: 'https://i.ibb.co/t2mfKZ4/rainbow-sprinkle.png',
                     title: 'Rainbow Sprinkle'
                   },
                   {
                     id: '2',
-                    image: './dist/red-sprinkle.png',
+                    image: 'https://i.ibb.co/C01bsVb/red-sprinkle.png',
                     title: 'Red Sprinkle'
                   }
                 ]
@@ -369,7 +419,6 @@
               }
             ]
           };
-          this.backToMain = this.backToMain.bind(this);
           this.review = this.review.bind(this);
           this.topCarousel = React.createRef();
           this.stepContent = React.createRef();
@@ -379,7 +428,7 @@
           const topCarousel = new Hammer(this.topCarousel.current);
           const stepContent = new Hammer(this.stepContent.current);
           const _this = this;
-          topCarousel.on('panend', function(ev) {
+          topCarousel.on('panend', ev => {
             switch (ev.direction) {
               case 4:
                 _this.changeStep('prev');
@@ -390,7 +439,12 @@
             }
           });
 
-          stepContent.on('panend', function(ev) {
+          stepContent.on('panstart', ev => {
+            this.setState({
+              panIsActive: true
+            });
+          });
+          stepContent.on('panend', ev => {
             const _currentStep = _this.state.step;
             const _currentItem = _this.state.steps[_currentStep].item;
             switch (ev.direction) {
@@ -414,11 +468,16 @@
 
                 break;
             }
+            setTimeout(() => {
+              this.setState({
+                panIsActive: false
+              });
+            }, 1);
           });
         }
 
-        backToMain() {
-          this.props.onChangeRouter('welcomeScreen');
+        changeRoute(address, props) {
+          this.props.onChangeRouter(address, props);
         }
 
         review() {
@@ -454,7 +513,10 @@
           return (
             <div id="producer-screen">
               <div className="nav-bar">
-                <button className="back-buttom" onClick={this.backToMain}>
+                <button
+                  className="back-buttom"
+                  onClick={() => this.changeRoute('welcomeScreen')}
+                >
                   <i className="icon-arrow-left" />
                 </button>
                 <button className="app-icon" onClick={this.review}>
@@ -570,7 +632,14 @@
                             {this.state.steps.map((v, i) => {
                               if (!v.review) {
                                 return (
-                                  <div className="review-item" key={i}>
+                                  <div
+                                    onClick={() => {
+                                      if (!this.state.panIsActive)
+                                        this.setState({ step: i });
+                                    }}
+                                    className="review-item"
+                                    key={i}
+                                  >
                                     <div
                                       className="review-item-image"
                                       style={{
@@ -580,13 +649,18 @@
                                       }}
                                     />
                                     <p>{v.items[v.item].title}</p>
+                                    <i className="icon-chevron-right" />
                                   </div>
                                 );
                               }
                             })}
 
                             <button
-                              onClick={this.tapToBegin}
+                              onClick={() =>
+                                this.changeRoute('finalScreen', {
+                                  steps: this.state.steps
+                                })
+                              }
                               className="btn btn-primary"
                             >
                               <i className="icon-check" />
@@ -604,6 +678,49 @@
         }
       }
 
+      /**
+       * Final screen
+       * This component is final screen of application
+       */
+      class FinalScreenComponent extends React.Component {
+        render() {
+          const { steps } = this.props;
+          return (
+            <div id="final-screen">
+              <div className="final-screen-message">
+                <h1>Congratulation</h1>
+                <p>Your ice cream has been created successfully</p>
+              </div>
+              <div className="manufactured-icecream">
+                <div
+                  className="selected-sprinkle"
+                  style={{
+                    backgroundImage: `url(${
+                      steps[2].items[steps[2].item].image
+                    })`
+                  }}
+                />
+                <div
+                  className="selected-flavor"
+                  style={{
+                    backgroundImage: `url(${
+                      steps[1].items[steps[1].item].image
+                    })`
+                  }}
+                />
+                <div
+                  className="selected-cone"
+                  style={{
+                    backgroundImage: `url(${
+                      steps[0].items[steps[0].item].image
+                    })`
+                  }}
+                />
+              </div>
+            </div>
+          );
+        }
+      }
       ReactDOM.render(<MobileComponent />, document.getElementById('root'));
     </script>
   </body>
